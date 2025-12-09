@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-RPM_URL="https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/smog2-2.5-3.el9.x86_64.rpm"
 APPDIR="smog2.AppDir"
 APPNAME="smog2"
 BINARY_NAME="smog2"
