@@ -12,7 +12,7 @@ export ARCH=x86_64
 rm -rf "$APPDIR"
 mkdir -p "$APPDIR"/{usr/bin,usr/share,usr/share/applications,usr/share/icons/hicolor/256x256/apps/}
 
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/smog2-2.5-3.el9.x86_64.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/smog2-2.5-4.el9.x86_64.rpm
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
 
@@ -90,6 +90,7 @@ if [ ! -f linuxdeploy ]; then
 fi
 
 echo "Building AppImage..."
+export LD_LIBRARY_PATH=/usr/lib/jvm/java-21-openjdk/lib/server:$LD_LIBRARY_PATH
 ./linuxdeploy --appdir "$APPDIR" --output appimage
 chmod +x smog2-x86_64.AppImage
 
