@@ -31,8 +31,9 @@ cp /usr/bin/perl "$APPDIR/usr/bin/"
 mkdir -p "$APPDIR/usr/lib64/perl5"
 cp -r /usr/lib64/perl5/ "$APPDIR/usr/lib64/"
 
-mkdir -p "$APPDIR/usr/lib/java"
-cp -r /usr/lib/java/ "$APPDIR/usr/lib/"
+mkdir -p "$APPDIR/usr/lib/jvm"
+cp -r /usr/lib/jvm/java-21-openjdk/ "$APPDIR/usr/lib/jvm/"
+
 
 # ---- APPDIR: AppRun ------------------------------------------------
 
@@ -50,7 +51,7 @@ export PERL5LIB="$SMOG_PATH:$APPDIR/usr/share/perl5/vendor_perl:$APPDIR/usr/lib6
 export PERLLIB="$SMOG_PATH:$PERLLIB"
 export PERL5LIB="$SMOG_PATH:$PERL5LIB"
 
-export JAVA_HOME="$APPDIR/usr/lib/java"
+export JAVA_HOME="$APPDIR/usr/lib/jvm/java-21-openjdk/"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 export perl4smog=/usr/bin/perl
