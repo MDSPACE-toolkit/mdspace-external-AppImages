@@ -11,28 +11,41 @@ ICON_NAME="genesis"
 
 export ARCH=x86_64
 rm -rf "$APPDIR"
+mkdir -p "$APPDIR"/{usr/bin,usr/share,usr/share/applications,usr/share/icons/hicolor/256x256/apps/}
 
 dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/genesis-2.1.6-0.el9.x86_64.rpm
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
-SO_BUNDLE=so_bundle
+echo "Copying binary..."
+cp /usr/bin/"$BINARY_NAME" "$APPDIR/usr/bin/"
 
-if [ ! -f "$SO_BUNDLE" ]; then
-    echo "[INFO] Downloading so_bundle..."
-    curl -L -o so_bundle \
-        https://github.com/bgallois/SoBundle/releases/download/continuous/so_bundle
-    chmod +x so_bundle
+mkdir -p "$APPDIR/usr/lib64/"
+
+# ---- APPDIR: AppRun ------------------------------------------------
+
+echo "Generating AppRun..."
+
+cat > "$APPDIR/AppRun" << 'EOF'
+#!/usr/bin/env bash
+set -e
+
+APPDIR="$(dirname "$(readlink -f "$0")")"
+
+if ! command -v mpirun >/dev/null 2>&1; then
+    echo "Error: No MPI runtime found on this system (mpirun missing)."
+    echo "Please install OpenMPI or load the appropriate MPI module."
+    exit 1
 fi
 
+exec "$APPDIR/usr/bin/atdyn" "$@"
 
-./so_bundle -e /usr/bin/atdyn -a "$APPDIR"
-
+EOF
 
 # ---- DESKTOP FILE --------------------------------------------------
 
 echo "Writing desktop file..."
 
-cat > "$APPDIR/$APPNAME.desktop" << EOF
+cat > "$APPDIR/usr/share/applications/$APPNAME.desktop" << EOF
 [Desktop Entry]
 Name=atdyn
 Exec=AppRun
@@ -46,21 +59,20 @@ EOF
 # ---- ICON -----------------------------------------------------------
 
 echo "Creating dummy icon..."
-convert -size 256x256 canvas:gray "$APPDIR/$ICON_NAME.png"
+convert -size 256x256 canvas:gray "$APPDIR/usr/share/icons/hicolor/256x256/apps/$ICON_NAME.png"
 
 # ---- APPIMAGE BUILD -------------------------------------------------
 
-echo "Downloading appimagetool..."
-if [ ! -f "appimagetool-x86_64.AppImage" ]; then
-    echo "[INFO] Downloading appimagetool..."
-    curl -L -o appimagetool-x86_64.AppImage \
-        https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-    chmod +x appimagetool-x86_64.AppImage
+echo "Downloading linuxdeploy..."
+if [ ! -f linuxdeploy ]; then
+    curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage \
+         -o linuxdeploy
+    chmod +x linuxdeploy
 fi
 
 echo "Building AppImage..."
-./appimagetool-x86_64.AppImage --appimage-extract
-./squashfs-root/AppRun $APPDIR atdyn-x86_64.AppImage
+export LD_LIBRARY_PATH="$APPDIR/usr/lib64:$APPDIR/usr/lib64/pmix:$APPDIR/usr/lib64/openmpi/lib:$APPDIR/usr/lib64/openmpi/lib/openmpi:$LD_LIBRARY_PATH"
+./linuxdeploy --appdir "$APPDIR" --output appimage
 
 echo "------------------------------------------------------------"
 echo "DONE! Built atdyn-x86_64.AppImage"
