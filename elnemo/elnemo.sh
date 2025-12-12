@@ -25,9 +25,9 @@ fi
 
 echo "Writing desktop file..."
 
-cat > "nma_diagrtb.appdir/nma_diagrtn.desktop" << EOF
+cat > "nma_diagrtb.appdir/nma_diagrtb.desktop" << EOF
 [Desktop Entry]
-Name=nma_diagrtn
+Name=nma_diagrtb
 Exec=AppRun
 Icon=elnemo
 Type=Application
