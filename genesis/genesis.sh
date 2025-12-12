@@ -31,11 +31,7 @@ set -e
 
 APPDIR="$(dirname "$(readlink -f "$0")")"
 
-if ! command -v mpirun >/dev/null 2>&1; then
-    echo "Error: No MPI runtime found on this system (mpirun missing)."
-    echo "Please install OpenMPI or load the appropriate MPI module."
-    exit 1
-fi
+export LD_LIBRARY_PATH="$APPDIR/lib:$APPDIR/usr/lib:$LD_LIBRARY_PATH"
 
 exec "$APPDIR/usr/bin/atdyn" "$@"
 
@@ -71,8 +67,10 @@ if [ ! -f linuxdeploy ]; then
 fi
 
 echo "Building AppImage..."
-export LD_LIBRARY_PATH="$APPDIR/usr/lib64:$APPDIR/usr/lib64/pmix:$APPDIR/usr/lib64/openmpi/lib:$APPDIR/usr/lib64/openmpi/lib/openmpi:$LD_LIBRARY_PATH"
-./linuxdeploy --appdir "$APPDIR" --output appimage
+./linuxdeploy --appdir "$APPDIR" --output appimage \
+    --exclude-library=libmpi*.so* \
+    --exclude-library=libopen-pal*.so* \
+    --exclude-library=libopen-rte*.so*
 
 echo "------------------------------------------------------------"
 echo "DONE! Built atdyn-x86_64.AppImage"
