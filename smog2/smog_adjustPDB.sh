@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-APPDIR="smog2.AppDir"
-APPNAME="smog2"
-BINARY_NAME="smog2"
+APPDIR="smog_adjustPDB.AppDir"
+APPNAME="smog_adjustPDB"
+BINARY_NAME="smog_adjustPDB"
 ICON_NAME="smog2"
 
 # ---- PREP ----------------------------------------------------------
@@ -54,7 +54,7 @@ export JAVA_HOME="$APPDIR/usr/lib/jvm/java-21-openjdk/"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 export perl4smog=/usr/bin/perl
-SMOG_PATH="$SMOG_PATH" exec /usr/bin/perl "$SMOG_PATH/smogv2" "$@"
+SMOG_PATH="$SMOG_PATH" exec /usr/bin/perl "$SMOG_PATH/src/tools/adjustPDB" "$@"
 EOF
 
 chmod +x "$APPDIR/AppRun"
@@ -65,7 +65,7 @@ echo "Writing desktop file..."
 
 cat > "$APPDIR/usr/share/applications/$APPNAME.desktop" << EOF
 [Desktop Entry]
-Name=smog2
+Name=smog_adjustPDB
 Exec=AppRun
 Icon=$ICON_NAME
 Type=Application
@@ -91,8 +91,8 @@ fi
 echo "Building AppImage..."
 export LD_LIBRARY_PATH=/usr/lib/jvm/java-21-openjdk/lib/server:$LD_LIBRARY_PATH
 ./linuxdeploy --appdir "$APPDIR" --output appimage
-chmod +x smog2-x86_64.AppImage
+chmod +x smog_adjustPDB-x86_64.AppImage
 
 echo "------------------------------------------------------------"
-echo "DONE! Built smog2-x86_64.AppImage"
+echo "DONE! Built smog_adjustPDB-x86_64.AppImage"
 echo "------------------------------------------------------------"
