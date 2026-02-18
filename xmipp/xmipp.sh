@@ -5,7 +5,7 @@ set -e
 
 export ARCH=x86_64
 
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/xmipp-3.25.06.0-2.el9.x86_64.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/xmipp-3.25.06.0-3.el9.x86_64.rpm
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
 SO_BUNDLE=so_bundle
@@ -17,54 +17,63 @@ if [ ! -f "$SO_BUNDLE" ]; then
     chmod +x so_bundle
 fi
 
-
-./so_bundle -e /usr/bin/xmipp_reconstruct_fourier -a xmipp_reconstruct_fourier.appdir
-./so_bundle -e /usr/bin/xmipp_image_convert -a xmipp_image_convert.appdir
-
-# ---- DESKTOP FILE --------------------------------------------------
-
-echo "Writing desktop file..."
-
-cat > "xmipp_reconstruct_fourier.appdir/xmipp_reconstruct_fourier.desktop" << EOF
-[Desktop Entry]
-Name=xmipp_reconstruct_fourier
-Exec=AppRun
-Icon=xmipp
-Type=Application
-Categories=Science;
-Terminal=true
-EOF
-
-cat > "xmipp_image_convert.appdir/xmipp_image_convert.desktop" << EOF
-[Desktop Entry]
-Name=xmipp_image_convert
-Exec=AppRun
-Icon=xmipp
-Type=Application
-Categories=Science;
-Terminal=true
-EOF
-#
-# ---- ICON -----------------------------------------------------------
-
-echo "Creating dummy icon..."
-convert -size 256x256 canvas:gray "xmipp_reconstruct_fourier.appdir/xmipp.png"
-convert -size 256x256 canvas:gray "xmipp_image_convert.appdir/xmipp.png"
-
 # ---- APPIMAGE BUILD -------------------------------------------------
 
 echo "Downloading appimagetool..."
-if [ ! -f "appimagetool-x86_64.AppImage" ]; then
-    echo "[INFO] Downloading appimagetool..."
-    curl -L -o appimagetool-x86_64.AppImage \
-        https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-    chmod +x appimagetool-x86_64.AppImage
-fi
+APPIMAGETOOL=appimagetool-x86_64.AppImage
+APPIMAGETOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+echo "[INFO] Downloading $APPIMAGETOOL..."
+curl -L -o "$APPIMAGETOOL" "$APPIMAGETOOL_URL"
+chmod +x "$APPIMAGETOOL"
+./"$APPIMAGETOOL" --appimage-extract >/dev/null
 
-echo "Building AppImage..."
-./appimagetool-x86_64.AppImage --appimage-extract
-./squashfs-root/AppRun xmipp_reconstruct_fourier.appdir xmipp_reconstruct_fourier-x86_64.AppImage
-./squashfs-root/AppRun xmipp_image_convert.appdir xmipp_image_convert-x86_64.AppImage
+
+apps=(
+  xmipp_reconstruct_fourier
+  xmipp_image_convert
+  xmipp_volume_from_pdb
+  xmipp_phantom_project
+  xmipp_image_resize
+  xmipp_phantom_simulate_microscope
+  xmipp_ctf_phase_flip
+)
+
+for app in "${apps[@]}"; do
+  exe="/usr/bin/${app}"
+  appdir="${app}.appdir"
+  desktop="${appdir}/${app}.desktop"
+  icon="${appdir}/xmipp.png"
+  out="${app}-x86_64.AppImage"
+
+  echo "------------------------------------------------------------"
+  echo "Bundling: $app"
+  echo "------------------------------------------------------------"
+
+  [[ -x "$exe" ]] || { echo "[ERROR] Missing executable: $exe" >&2; exit 1; }
+
+  # Bundle shared libs etc.
+  ./so_bundle -e "$exe" -a "$appdir"
+
+  # ---- DESKTOP FILE --------------------------------------------------
+  echo "Writing desktop file..."
+  cat > "$desktop" <<EOF
+[Desktop Entry]
+Name=$app
+Exec=AppRun
+Icon=xmipp
+Type=Application
+Categories=Science;
+Terminal=true
+EOF
+
+  # ---- ICON ----------------------------------------------------------
+  echo "Creating dummy icon..."
+  convert -size 256x256 canvas:gray "$icon"
+
+  # ---- APPIMAGE BUILD ------------------------------------------------
+  echo "Building AppImage..."
+  ./squashfs-root/AppRun "$appdir" "$out"
+done
 
 echo "------------------------------------------------------------"
 echo "DONE! Built XMIPP"
