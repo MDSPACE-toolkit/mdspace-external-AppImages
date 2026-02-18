@@ -13,7 +13,7 @@ export ARCH=x86_64
 rm -rf "$APPDIR"
 mkdir -p "$APPDIR"/{usr/bin,usr/share,usr/share/applications,usr/share/icons/hicolor/256x256/apps/}
 
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/genesis-2.1.6-0.el9.x86_64.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/genesis-2.1.6.2-0.el9.x86_64.rpm
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
 echo "Copying binary..."
