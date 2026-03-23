@@ -68,9 +68,6 @@ fi
 
 echo "Building AppImage..."
 ./linuxdeploy --appdir "$APPDIR" --output appimage \
-    --exclude-library=libmpi*.so* \
-    --exclude-library=libopen-pal*.so* \
-    --exclude-library=libopen-rte*.so*
 
 echo "------------------------------------------------------------"
 echo "DONE! Built atdyn-x86_64.AppImage"
