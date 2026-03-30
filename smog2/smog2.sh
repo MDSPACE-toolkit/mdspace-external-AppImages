@@ -54,7 +54,7 @@ export JAVA_HOME="$APPDIR/usr/lib/jvm/java-21-openjdk/"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 export perl4smog=/usr/bin/perl
-SMOG_PATH="$SMOG_PATH" exec /usr/bin/perl "$SMOG_PATH/smogv2" "$@"
+SMOG_PATH="$SMOG_PATH" exec "$PERL_BIN" "$SMOG_PATH/smogv2" "$@"
 EOF
 
 chmod +x "$APPDIR/AppRun"
