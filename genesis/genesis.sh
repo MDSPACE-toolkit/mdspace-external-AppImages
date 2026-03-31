@@ -29,12 +29,25 @@ cat > "$APPDIR/AppRun" << 'EOF'
 #!/usr/bin/env bash
 set -e
 
-APPDIR="$(dirname "$(readlink -f "$0")")"
+APPDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-export LD_LIBRARY_PATH="$APPDIR/lib:$APPDIR/usr/lib:$LD_LIBRARY_PATH"
+MPI_LIBDIRS=""
+if command -v mpif90 >/dev/null 2>&1; then
+  MPI_LIBDIRS="$(mpif90 --showme:libdirs 2>/dev/null || true)"
+elif command -v mpirun >/dev/null 2>&1; then
+  MPI_LIBDIRS="$(mpirun --showme:libdirs 2>/dev/null || true)"
+fi
+
+for d in $MPI_LIBDIRS \
+         /usr/lib64/openmpi/lib \
+         /usr/lib/x86_64-linux-gnu/openmpi/lib
+do
+  [ -d "$d" ] && LD_LIBRARY_PATH="$d:${LD_LIBRARY_PATH:-}"
+done
+
+export LD_LIBRARY_PATH="$APPDIR/lib:$APPDIR/usr/lib:$APPDIR/usr/lib64:${LD_LIBRARY_PATH:-}"
 
 exec "$APPDIR/usr/bin/atdyn" "$@"
-
 EOF
 
 # ---- DESKTOP FILE --------------------------------------------------

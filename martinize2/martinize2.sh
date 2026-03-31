@@ -12,7 +12,7 @@ mkdir -p "$APPDIR"/usr/{bin,share,share/applications,share/icons/hicolor/256x256
 
 # ---- BUILD RUNTIME -------------------------------------------------
 
-python3 -m venv "$APPDIR/usr/venv"
+python3 -m venv --copies "$APPDIR/usr/venv"
 "$APPDIR/usr/venv/bin/pip" install --upgrade pip
 "$APPDIR/usr/venv/bin/pip" install vermouth
 
@@ -29,7 +29,7 @@ APPDIR="$(dirname "$(readlink -f "$0")")"
 export PATH="$APPDIR/usr/venv/bin:$APPDIR/usr/bin:$PATH"
 export PYTHONNOUSERSITE=1
 
-exec "$APPDIR/usr/venv/bin/martinize2" "$@"
+"$APPDIR/usr/venv/bin/python" "$APPDIR/usr/venv/bin/martinize2"
 EOF
 chmod +x "$APPDIR/AppRun"
 
