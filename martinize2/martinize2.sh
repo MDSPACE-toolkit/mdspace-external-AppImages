@@ -7,16 +7,29 @@ ICON_NAME="martinize2"
 
 export ARCH=x86_64
 
-rm -rf "$APPDIR"
-mkdir -p "$APPDIR"/usr/{bin,share,share/applications,share/icons/hicolor/256x256/apps}
+rm -rf "$APPDIR" build-nuitka
+mkdir -p "$APPDIR"/usr/{bin,lib,share,share/applications,share/icons/hicolor/256x256/apps}
 
-# ---- BUILD RUNTIME -------------------------------------------------
+python3 -m pip install --upgrade pip
+python3 -m pip install --upgrade nuitka ordered-set zstandard vermouth
 
-python3 -m venv --copies "$APPDIR/usr/venv"
-"$APPDIR/usr/venv/bin/pip" install --upgrade pip
-"$APPDIR/usr/venv/bin/pip" install vermouth
+MARTINIZE2_SCRIPT="$(command -v martinize2)"
 
-ln -sf ../venv/bin/martinize2 "$APPDIR/usr/bin/martinize2"
+python3 -m nuitka \
+  --standalone \
+  --deployment \
+  --static-libpython=no \
+  --output-dir=build-nuitka \
+  --output-filename=martinize2 \
+  --include-package=vermouth \
+  --include-package-data=vermouth \
+  "$MARTINIZE2_SCRIPT"
+
+mkdir -p "$APPDIR/usr/lib/martinize2"
+cp -a build-nuitka/martinize2.dist/. "$APPDIR/usr/lib/martinize2/"
+
+# Optional convenience symlink
+ln -sf ../lib/martinize2/martinize2 "$APPDIR/usr/bin/martinize2"
 
 # ---- APPDIR: AppRun ------------------------------------------------
 
@@ -24,18 +37,20 @@ cat > "$APPDIR/AppRun" << 'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 
-APPDIR="$(dirname "$(readlink -f "$0")")"
+APPDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RUNDIR="$APPDIR/usr/lib/martinize2"
 
-export PATH="$APPDIR/usr/venv/bin:$APPDIR/usr/bin:$PATH"
+export LD_LIBRARY_PATH="$RUNDIR:$RUNDIR/scipy.libs:$RUNDIR/numpy.libs:${LD_LIBRARY_PATH:-}"
+export PATH="$RUNDIR:${PATH:-}"
 export PYTHONNOUSERSITE=1
+unset PYTHONPATH
+unset PYTHONHOME
 
-"$APPDIR/usr/venv/bin/python" "$APPDIR/usr/venv/bin/martinize2"
+exec "$RUNDIR/martinize2" "$@"
 EOF
 chmod +x "$APPDIR/AppRun"
 
-# ---- DESKTOP FILE --------------------------------------------------
-
-cat > "$APPDIR/usr/share/applications/$APPNAME.desktop" << EOF
+cat > "$APPDIR/$APPNAME.desktop" << EOF
 [Desktop Entry]
 Name=martinize2
 Exec=AppRun
@@ -46,24 +61,20 @@ Terminal=true
 Comment=Martini topology generation tool
 EOF
 
-# ---- ICON ----------------------------------------------------------
-
 if command -v convert >/dev/null 2>&1; then
   convert -size 256x256 canvas:lightblue \
-    "$APPDIR/usr/share/icons/hicolor/256x256/apps/$ICON_NAME.png"
+    "$APPDIR/$ICON_NAME.png"
 else
-  printf '' > "$APPDIR/usr/share/icons/hicolor/256x256/apps/$ICON_NAME.png"
+  printf '' > "$APPDIR/$ICON_NAME.png"
 fi
 
-# ---- linuxdeploy ---------------------------------------------------
-
-if [ ! -f linuxdeploy ]; then
+if [ ! -f appimagetool ]; then
   curl -L \
-    https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage \
-    -o linuxdeploy
-  chmod +x linuxdeploy
+    https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage \
+    -o appimagetool
+  chmod +x appimagetool
 fi
 
-./linuxdeploy --appdir "$APPDIR" --output appimage
+ARCH=x86_64 ./appimagetool "$APPDIR"
 
-echo "DONE: built martinize2-x86_64.AppImage"
+echo "DONE: built ${APPNAME}-x86_64.AppImage"
