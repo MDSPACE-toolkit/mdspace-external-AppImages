@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -e
+rm -rf squashfs-root *.appdir
 
 # ---- PREP ----------------------------------------------------------
 
 export ARCH=x86_64
 
 dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/elnemo-1.0.0-1.el9.x86_64.rpm
+dnf -y install ImageMagick patchelf
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
 SO_BUNDLE=so_bundle
@@ -54,12 +56,10 @@ convert -size 256x256 canvas:gray "nma_elnemo_pdbmat.appdir/elnemo.png"
 # ---- APPIMAGE BUILD -------------------------------------------------
 
 echo "Downloading appimagetool..."
-if [ ! -f "appimagetool-x86_64.AppImage" ]; then
-    echo "[INFO] Downloading appimagetool..."
-    curl -L -o appimagetool-x86_64.AppImage \
-        https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-    chmod +x appimagetool-x86_64.AppImage
-fi
+echo "[INFO] Downloading appimagetool..."
+curl -L -o appimagetool-x86_64.AppImage \
+    https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+chmod +x appimagetool-x86_64.AppImage
 
 echo "Building AppImage..."
 ./appimagetool-x86_64.AppImage --appimage-extract

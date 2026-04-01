@@ -13,6 +13,8 @@ rm -rf "$APPDIR"
 mkdir -p "$APPDIR"/{usr/bin,usr/share,usr/share/applications,usr/share/icons/hicolor/256x256/apps/}
 
 dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/smog2-2.5-5.el9.x86_64.rpm
+dnf -y install java-17-openjdk java-17-openjdk-devel
+dnf -y install ImageMagick fuse
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
 
@@ -32,7 +34,7 @@ mkdir -p "$APPDIR/usr/lib64/perl5"
 cp -r /usr/lib64/perl5/ "$APPDIR/usr/lib64/"
 
 mkdir -p "$APPDIR/usr/lib/jvm"
-cp -r /usr/lib/jvm/java-21-openjdk/ "$APPDIR/usr/lib/jvm/"
+cp -r /usr/lib/jvm/java-17-openjdk/ "$APPDIR/usr/lib/jvm/"
 
 
 # ---- APPDIR: AppRun ------------------------------------------------
@@ -50,7 +52,7 @@ PERL_BIN="$APPDIR/usr/bin/perl"
 export PERL5LIB="$SMOG_PATH:$APPDIR/usr/share/perl5/vendor_perl:$APPDIR/usr/lib64/perl5/vendor_perl:$APPDIR/usr/share/perl5:$APPDIR/usr/lib64/perl5:$PERL5LIB"
 export PERLLIB="$SMOG_PATH:$PERLLIB"
 
-export JAVA_HOME="$APPDIR/usr/lib/jvm/java-21-openjdk/"
+export JAVA_HOME="$APPDIR/usr/lib/jvm/java-17-openjdk/"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 export perl4smog=/usr/bin/perl
@@ -82,15 +84,20 @@ convert -size 256x256 canvas:gray "$APPDIR/usr/share/icons/hicolor/256x256/apps/
 # ---- APPIMAGE BUILD -------------------------------------------------
 
 echo "Downloading linuxdeploy..."
-if [ ! -f linuxdeploy ]; then
+if [ ! -f linuxdeploy.AppImage ]; then
     curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage \
-         -o linuxdeploy
-    chmod +x linuxdeploy
+         -o linuxdeploy.AppImage
+    chmod +x linuxdeploy.AppImage
 fi
 
+echo "Extracting linuxdeploy..."
+rm -rf squashfs-root
+./linuxdeploy.AppImage --appimage-extract >/dev/null
+
 echo "Building AppImage..."
-export LD_LIBRARY_PATH=/usr/lib/jvm/java-21-openjdk/lib/server:$LD_LIBRARY_PATH
-./linuxdeploy --appdir "$APPDIR" --output appimage
+export LD_LIBRARY_PATH=/usr/lib/jvm/java-17-openjdk/lib/server${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+./squashfs-root/AppRun --appdir "$APPDIR" --output appimage
+
 chmod +x smog2-x86_64.AppImage
 
 echo "------------------------------------------------------------"

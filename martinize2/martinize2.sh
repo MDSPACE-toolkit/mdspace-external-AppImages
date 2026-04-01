@@ -10,6 +10,10 @@ export ARCH=x86_64
 rm -rf "$APPDIR" build-nuitka
 mkdir -p "$APPDIR"/usr/{bin,lib,share,share/applications,share/icons/hicolor/256x256/apps}
 
+dnf -y groupinstall "Development Tools"
+dnf -y install python3-devel
+dnf -y install ImageMagick patchelf
+dnf -y install python3-pip python3-virtualenv
 python3 -m pip install --upgrade pip
 python3 -m pip install --upgrade nuitka ordered-set zstandard vermouth
 
@@ -68,13 +72,16 @@ else
   printf '' > "$APPDIR/$ICON_NAME.png"
 fi
 
-if [ ! -f appimagetool ]; then
+if [ ! -f appimagetool.AppImage ]; then
   curl -L \
     https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage \
-    -o appimagetool
-  chmod +x appimagetool
+    -o appimagetool.AppImage
+  chmod +x appimagetool.AppImage
 fi
 
-ARCH=x86_64 ./appimagetool "$APPDIR"
+rm -rf squashfs-root
+./appimagetool.AppImage --appimage-extract >/dev/null
+
+ARCH=x86_64 ./squashfs-root/AppRun "$APPDIR"
 
 echo "DONE: built ${APPNAME}-x86_64.AppImage"

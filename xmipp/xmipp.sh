@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 set -e
+rm -rf squashfs-root *.appdir
 
 # ---- PREP ----------------------------------------------------------
 
 export ARCH=x86_64
 
 dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/xmipp-3.25.06.0-3.el9.x86_64.rpm
+dnf install -y patchelf
+dnf -y install java-21-openjdk java-21-openjdk-devel
+dnf -y install ImageMagick
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
 SO_BUNDLE=so_bundle

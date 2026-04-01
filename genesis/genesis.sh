@@ -14,6 +14,7 @@ rm -rf "$APPDIR"
 mkdir -p "$APPDIR"/{usr/bin,usr/share,usr/share/applications,usr/share/icons/hicolor/256x256/apps/}
 
 dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/genesis-2.1.6.2-0.el9.x86_64.rpm
+dnf -y install ImageMagick fuse
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
 echo "Copying binary..."
@@ -73,14 +74,18 @@ convert -size 256x256 canvas:gray "$APPDIR/usr/share/icons/hicolor/256x256/apps/
 # ---- APPIMAGE BUILD -------------------------------------------------
 
 echo "Downloading linuxdeploy..."
-if [ ! -f linuxdeploy ]; then
+if [ ! -f linuxdeploy.AppImage ]; then
     curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage \
-         -o linuxdeploy
-    chmod +x linuxdeploy
+         -o linuxdeploy.AppImage
+    chmod +x linuxdeploy.AppImage
 fi
 
+echo "Extracting linuxdeploy..."
+rm -rf squashfs-root
+./linuxdeploy.AppImage --appimage-extract >/dev/null
+
 echo "Building AppImage..."
-./linuxdeploy --appdir "$APPDIR" --output appimage \
+./squashfs-root/AppRun --appdir "$APPDIR" --output appimage \
     --exclude-library=libmpi*.so* \
     --exclude-library=libopen-pal*.so* \
     --exclude-library=libopen-rte*.so*
