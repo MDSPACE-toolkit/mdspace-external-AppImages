@@ -1,0 +1,33 @@
+name: Build ARM64 RPMs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+
+    strategy:
+      fail-fast: false
+      matrix:
+        spec:
+          - elnemo/elnemo.sh
+          - genesis/genesis.sh
+          - smog2/smog2.sh
+          - xmipp/xmipp.sh
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build AppImage
+        env:
+          ARCH: aarch64
+        run: |
+          chmod +x ./build.sh
+          ./build.sh "${{ matrix.spec }}"
+
+      - name: Upload AppImages
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ strategy.job-index }}-arm64-rpms
+          path: "**/*-aarch64.AppImage"

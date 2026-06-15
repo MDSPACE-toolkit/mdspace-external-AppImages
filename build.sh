@@ -33,7 +33,10 @@ done
 SCRIPTS_JSON="$(printf '%s\n' "${SCRIPT_PATHS_IN_CONTAINER[@]}")"
 DIRS_JSON="$(printf '%s\n' "${SCRIPT_DIRS_IN_CONTAINER[@]}")"
 
+: "${ARCH:?ARCH must be set to x86_64 or aarch64}"
+
 docker run --rm \
+  -e ARCH="$ARCH" \
   -v "$PROJECT_ROOT:/work" \
   -w /work \
   almalinux:9.5 \
@@ -145,7 +148,7 @@ EOF
       chmod +x "$SCRIPT_IN_CONTAINER"
       ( cd "$SCRIPT_DIR_IN_CONTAINER" && "$SCRIPT_IN_CONTAINER" )
 
-      mapfile -t appimages < <(find "$SCRIPT_DIR_IN_CONTAINER" -maxdepth 1 -type f -name "*-x86_64.AppImage" | sort)
+      mapfile -t appimages < <(find "$SCRIPT_DIR_IN_CONTAINER" -maxdepth 1 -type f -name "*-${ARCH}.AppImage" | sort)
       if [ "${#appimages[@]}" -eq 0 ]; then
         echo "ERROR: no AppImages produced by $SCRIPT_IN_CONTAINER" >&2
         exit 1

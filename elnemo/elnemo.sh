@@ -4,9 +4,7 @@ rm -rf squashfs-root *.appdir
 
 # ---- PREP ----------------------------------------------------------
 
-export ARCH=x86_64
-
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/elnemo-1.0.0-1.el9.x86_64.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/elnemo-1.0.0-1.el9.${ARCH}.rpm
 dnf -y install ImageMagick patchelf
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
@@ -15,7 +13,7 @@ SO_BUNDLE=so_bundle
 if [ ! -f "$SO_BUNDLE" ]; then
     echo "[INFO] Downloading so_bundle..."
     curl -L -o so_bundle \
-        https://github.com/bgallois/SoBundle/releases/download/continuous/so_bundle
+        https://github.com/bgallois/SoBundle/releases/download/continuous/so_bundle_${ARCH}
     chmod +x so_bundle
 fi
 
@@ -57,14 +55,14 @@ convert -size 256x256 canvas:gray "nma_elnemo_pdbmat.appdir/elnemo.png"
 
 echo "Downloading appimagetool..."
 echo "[INFO] Downloading appimagetool..."
-curl -L -o appimagetool-x86_64.AppImage \
-    https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-chmod +x appimagetool-x86_64.AppImage
+curl -L -o appimagetool-${ARCH}.AppImage \
+    https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${ARCH}.AppImage
+chmod +x appimagetool-${ARCH}.AppImage
 
 echo "Building AppImage..."
-./appimagetool-x86_64.AppImage --appimage-extract
-./squashfs-root/AppRun nma_diagrtb.appdir nma_diagrtb-x86_64.AppImage
-./squashfs-root/AppRun nma_elnemo_pdbmat.appdir nma_elnemo_pdbmat-x86_64.AppImage
+./appimagetool-${ARCH}.AppImage --appimage-extract
+./squashfs-root/AppRun nma_diagrtb.appdir nma_diagrtb-${ARCH}.AppImage
+./squashfs-root/AppRun nma_elnemo_pdbmat.appdir nma_elnemo_pdbmat-${ARCH}.AppImage
 
 echo "------------------------------------------------------------"
 echo "DONE! Built Elnemo"

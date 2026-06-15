@@ -5,8 +5,6 @@ APPDIR="martinize2.AppDir"
 APPNAME="martinize2"
 ICON_NAME="martinize2"
 
-export ARCH=x86_64
-
 rm -rf "$APPDIR" build-nuitka
 mkdir -p "$APPDIR"/usr/{bin,lib,share,share/applications,share/icons/hicolor/256x256/apps}
 
@@ -74,7 +72,7 @@ fi
 
 if [ ! -f appimagetool.AppImage ]; then
   curl -L \
-    https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage \
+    https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${ARCH}.AppImage \
     -o appimagetool.AppImage
   chmod +x appimagetool.AppImage
 fi
@@ -82,6 +80,6 @@ fi
 rm -rf squashfs-root
 ./appimagetool.AppImage --appimage-extract >/dev/null
 
-ARCH=x86_64 ./squashfs-root/AppRun "$APPDIR"
+ARCH=${ARCH} ./squashfs-root/AppRun "$APPDIR"
 
-echo "DONE: built ${APPNAME}-x86_64.AppImage"
+echo "DONE: built ${APPNAME}-${ARCH}.AppImage"

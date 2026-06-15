@@ -8,11 +8,10 @@ ICON_NAME="smog2"
 
 # ---- PREP ----------------------------------------------------------
 
-export ARCH=x86_64
 rm -rf "$APPDIR"
 mkdir -p "$APPDIR"/{usr/bin,usr/share,usr/share/applications,usr/share/icons/hicolor/256x256/apps/}
 
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/smog2-2.5-5.el9.x86_64.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/smog2-2.5-5.el9.${ARCH}.rpm
 dnf -y install java-17-openjdk java-17-openjdk-devel
 dnf -y install ImageMagick fuse
 
@@ -85,7 +84,7 @@ convert -size 256x256 canvas:gray "$APPDIR/usr/share/icons/hicolor/256x256/apps/
 
 echo "Downloading linuxdeploy..."
 if [ ! -f linuxdeploy.AppImage ]; then
-    curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage \
+    curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-${ARCH}.AppImage \
          -o linuxdeploy.AppImage
     chmod +x linuxdeploy.AppImage
 fi
@@ -98,8 +97,8 @@ echo "Building AppImage..."
 export LD_LIBRARY_PATH=/usr/lib/jvm/java-17-openjdk/lib/server${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 ./squashfs-root/AppRun --appdir "$APPDIR" --output appimage
 
-chmod +x smog2-x86_64.AppImage
+chmod +x smog2-${ARCH}.AppImage
 
 echo "------------------------------------------------------------"
-echo "DONE! Built smog2-x86_64.AppImage"
+echo "DONE! Built smog2-${ARCH}.AppImage"
 echo "------------------------------------------------------------"

@@ -4,9 +4,7 @@ rm -rf squashfs-root *.appdir
 
 # ---- PREP ----------------------------------------------------------
 
-export ARCH=x86_64
-
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/rtb2-1.0.0-1.el9.x86_64.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/rtb2-1.0.0-1.el9.${ARCH}.rpm
 dnf -y install ImageMagick patchelf
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
@@ -70,14 +68,14 @@ convert -size 256x256 canvas:gray "makebloc.pl.appdir/makebloc.pl.png"
 
 echo "Downloading appimagetool..."
 echo "[INFO] Downloading appimagetool..."
-curl -L -o appimagetool-x86_64.AppImage \
-    https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-chmod +x appimagetool-x86_64.AppImage
+curl -L -o appimagetool-${ARCH}.AppImage \
+    https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${ARCH}.AppImage
+chmod +x appimagetool-${ARCH}.AppImage
 
 echo "Building AppImage..."
-./appimagetool-x86_64.AppImage --appimage-extract
-./squashfs-root/AppRun rtb2.appdir rtb2-x86_64.AppImage
-./squashfs-root/AppRun makebloc.pl.appdir makebloc.pl-x86_64.AppImage
+./appimagetool-${ARCH}.AppImage --appimage-extract
+./squashfs-root/AppRun rtb2.appdir rtb2-${ARCH}.AppImage
+./squashfs-root/AppRun makebloc.pl.appdir makebloc.pl-${ARCH}.AppImage
 
 echo "------------------------------------------------------------"
 echo "DONE! Built RTB2"

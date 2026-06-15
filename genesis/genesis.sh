@@ -9,11 +9,10 @@ ICON_NAME="genesis"
 
 # ---- PREP ----------------------------------------------------------
 
-export ARCH=x86_64
 rm -rf "$APPDIR"
 mkdir -p "$APPDIR"/{usr/bin,usr/share,usr/share/applications,usr/share/icons/hicolor/256x256/apps/}
 
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/genesis-2.1.6.2-0.el9.x86_64.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/genesis-2.1.6.2-0.el9.${ARCH}.rpm
 dnf -y install ImageMagick fuse
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
@@ -41,7 +40,7 @@ fi
 
 for d in $MPI_LIBDIRS \
          /usr/lib64/openmpi/lib \
-         /usr/lib/x86_64-linux-gnu/openmpi/lib
+         /usr/lib/${ARCH}-linux-gnu/openmpi/lib
 do
   [ -d "$d" ] && LD_LIBRARY_PATH="$d:${LD_LIBRARY_PATH:-}"
 done
@@ -75,7 +74,7 @@ convert -size 256x256 canvas:gray "$APPDIR/usr/share/icons/hicolor/256x256/apps/
 
 echo "Downloading linuxdeploy..."
 if [ ! -f linuxdeploy.AppImage ]; then
-    curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage \
+    curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-${ARCH}.AppImage \
          -o linuxdeploy.AppImage
     chmod +x linuxdeploy.AppImage
 fi
@@ -91,5 +90,5 @@ echo "Building AppImage..."
     --exclude-library=libopen-rte*.so*
 
 echo "------------------------------------------------------------"
-echo "DONE! Built atdyn-x86_64.AppImage"
+echo "DONE! Built atdyn-${ARCH}.AppImage"
 echo "------------------------------------------------------------"

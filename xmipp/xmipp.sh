@@ -4,9 +4,7 @@ rm -rf squashfs-root *.appdir
 
 # ---- PREP ----------------------------------------------------------
 
-export ARCH=x86_64
-
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/xmipp-3.25.06.0-3.el9.x86_64.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/xmipp-3.25.06.0-3.el9.${ARCH}.rpm
 dnf install -y patchelf
 dnf -y install java-21-openjdk java-21-openjdk-devel
 dnf -y install ImageMagick
@@ -17,15 +15,15 @@ SO_BUNDLE=so_bundle
 if [ ! -f "$SO_BUNDLE" ]; then
     echo "[INFO] Downloading so_bundle..."
     curl -L -o so_bundle \
-        https://github.com/bgallois/SoBundle/releases/download/continuous/so_bundle
+        https://github.com/bgallois/SoBundle/releases/download/continuous/so_bundle_${ARCH}
     chmod +x so_bundle
 fi
 
 # ---- APPIMAGE BUILD -------------------------------------------------
 
 echo "Downloading appimagetool..."
-APPIMAGETOOL=appimagetool-x86_64.AppImage
-APPIMAGETOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+APPIMAGETOOL=appimagetool-${ARCH}.AppImage
+APPIMAGETOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${ARCH}.AppImage"
 echo "[INFO] Downloading $APPIMAGETOOL..."
 curl -L -o "$APPIMAGETOOL" "$APPIMAGETOOL_URL"
 chmod +x "$APPIMAGETOOL"
@@ -47,7 +45,7 @@ for app in "${apps[@]}"; do
   appdir="${app}.appdir"
   desktop="${appdir}/${app}.desktop"
   icon="${appdir}/xmipp.png"
-  out="${app}-x86_64.AppImage"
+  out="${app}-${ARCH}.AppImage"
 
   echo "------------------------------------------------------------"
   echo "Bundling: $app"
