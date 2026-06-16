@@ -1,33 +1,194 @@
-name: Build ARM64 RPMs
+name: Build AppImages
 
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    runs-on: ubuntu-24.04-arm
+    name: Build ${{ matrix.component }} for ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
 
     strategy:
       fail-fast: false
       matrix:
-        spec:
-          - elnemo/elnemo.sh
-          - genesis/genesis.sh
-          - smog2/smog2.sh
-          - xmipp/xmipp.sh
+        include:
+          # x86-64
+          - component: elnemo
+            script: elnemo/elnemo.sh
+            arch: x86_64
+            runner: ubuntu-22.04
+
+          - component: genesis
+            script: genesis/genesis.sh
+            arch: x86_64
+            runner: ubuntu-22.04
+
+          - component: smog2
+            script: smog2/smog2.sh
+            arch: x86_64
+            runner: ubuntu-22.04
+
+          - component: smog_adjustPDB
+            script: smog2/smog_adjustPDB.sh
+            arch: x86_64
+            runner: ubuntu-22.04
+
+          - component: xmipp
+            script: xmipp/xmipp.sh
+            arch: x86_64
+            runner: ubuntu-22.04
+
+          - component: martinize2
+            script: martinize2/martinize2.sh
+            arch: x86_64
+            runner: ubuntu-22.04
+
+          # ARM64
+          - component: elnemo
+            script: elnemo/elnemo.sh
+            arch: aarch64
+            runner: ubuntu-22.04-arm
+
+          - component: genesis
+            script: genesis/genesis.sh
+            arch: aarch64
+            runner: ubuntu-22.04-arm
+
+          - component: smog2
+            script: smog2/smog2.sh
+            arch: aarch64
+            runner: ubuntu-22.04-arm
+
+          - component: smog_adjustPDB
+            script: smog2/smog_adjustPDB.sh
+            arch: aarch64
+            runner: ubuntu-22.04-arm
+
+          - component: xmipp
+            script: xmipp/xmipp.sh
+            arch: aarch64
+            runner: ubuntu-22.04-arm
+
+          - component: martinize2
+            script: martinize2/martinize2.sh
+            arch: aarch64
+            runner: ubuntu-22.04-arm
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Build AppImage
-        env:
-          ARCH: aarch64
+      - name: Verify architecture
+        shell: bash
         run: |
-          chmod +x ./build.sh
-          ./build.sh "${{ matrix.spec }}"
+          set -euo pipefail
 
-      - name: Upload AppImages
+          echo "Expected: ${{ matrix.arch }}"
+          echo "Runner:   $(uname -m)"
+
+          test "$(uname -m)" = "${{ matrix.arch }}"
+
+      - name: Build AppImages
+        shell: bash
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+
+          chmod +x ./build.sh
+          chmod +x "${{ matrix.script }}"
+
+          ./build.sh "${{ matrix.script }}"
+
+      - name: Collect AppImages
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p dist
+
+          component_dir="$(dirname "${{ matrix.script }}")"
+
+          find "$component_dir" \
+            -maxdepth 1 \
+            -type f \
+            -name "*-${{ matrix.arch }}.AppImage" \
+            ! -name "appimagetool-*" \
+            -exec cp -v {} dist/ \;
+
+          if ! compgen -G "dist/*-${{ matrix.arch }}.AppImage" > /dev/null; then
+            echo "ERROR: no AppImages were generated" >&2
+            exit 1
+          fi
+
+          sha256sum dist/*.AppImage
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ strategy.job-index }}-arm64-rpms
-          path: "**/*-aarch64.AppImage"
+          name: ${{ matrix.component }}-${{ matrix.arch }}
+          path: dist/*.AppImage
+          if-no-files-found: error
+          compression-level: 0
+
+  release:
+    name: Publish continuous release
+    needs: build
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all AppImages
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Inspect release files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          find dist -maxdepth 1 -type f -name "*.AppImage" -print
+
+          if ! compgen -G "dist/*.AppImage" > /dev/null; then
+            echo "ERROR: no AppImages were downloaded" >&2
+            exit 1
+          fi
+
+          chmod +x dist/*.AppImage
+          sha256sum dist/*.AppImage > dist/SHA256SUMS
+
+      - name: Move continuous tag to this commit
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag -f continuous "$GITHUB_SHA"
+          git push origin refs/tags/continuous --force
+
+      - name: Upload continuous release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: continuous
+          tag_name: continuous
+          files: |
+            dist/*.AppImage
+            dist/SHA256SUMS
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
