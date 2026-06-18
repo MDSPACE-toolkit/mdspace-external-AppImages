@@ -12,7 +12,7 @@ ICON_NAME="genesis"
 rm -rf "$APPDIR"
 mkdir -p "$APPDIR"/{usr/bin,usr/share,usr/share/applications,usr/share/icons/hicolor/256x256/apps/}
 
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/genesis-2.1.6.2-0.el9.${ARCH}.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/continuous/genesis-2.1.6.2-0.el9.${ARCH}.rpm
 dnf -y install ImageMagick fuse
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------

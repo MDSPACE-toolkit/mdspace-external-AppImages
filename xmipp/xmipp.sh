@@ -4,7 +4,7 @@ rm -rf squashfs-root *.appdir
 
 # ---- PREP ----------------------------------------------------------
 
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/xmipp-3.25.06.0-3.el9.${ARCH}.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/continuous/xmipp-3.25.06.0-4.el9.${ARCH}.rpm
 dnf install -y patchelf
 dnf -y install java-21-openjdk java-21-openjdk-devel
 dnf -y install ImageMagick

@@ -11,7 +11,7 @@ ICON_NAME="smog2"
 rm -rf "$APPDIR"
 mkdir -p "$APPDIR"/{usr/bin,usr/share,usr/share/applications,usr/share/icons/hicolor/256x256/apps/}
 
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/smog2-2.5-5.el9.${ARCH}.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/continuous/smog2-2.5-5.el9.${ARCH}.rpm
 dnf -y install java-17-openjdk java-17-openjdk-devel
 dnf -y install ImageMagick fuse
 

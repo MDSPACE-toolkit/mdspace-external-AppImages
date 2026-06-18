@@ -4,7 +4,7 @@ rm -rf squashfs-root *.appdir
 
 # ---- PREP ----------------------------------------------------------
 
-dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/v1.0.0/elnemo-1.0.0-1.el9.${ARCH}.rpm
+dnf install -y https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/continuous/elnemo-1.0.0-1.el9.${ARCH}.rpm
 dnf -y install ImageMagick patchelf
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
