@@ -49,6 +49,11 @@ jobs:
             arch: x86_64
             runner: ubuntu-22.04
 
+          - component: rtb2
+            script: rtb2/rtb2.sh
+            arch: x86_64
+            runner: ubuntu-22.04
+
           # ARM64
           - component: elnemo
             script: elnemo/elnemo.sh
@@ -77,6 +82,11 @@ jobs:
 
           - component: martinize2
             script: martinize2/martinize2.sh
+            arch: aarch64
+            runner: ubuntu-22.04-arm
+
+          - component: rtb2
+            script: rtb2/rtb2.sh
             arch: aarch64
             runner: ubuntu-22.04-arm
 
