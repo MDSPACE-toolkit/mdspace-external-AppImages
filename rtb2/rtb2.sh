@@ -10,7 +10,7 @@ rm -rf squashfs-root *.appdir *.AppImage
 dnf install -y \
   "https://github.com/MDSPACE-toolkit/mdspace-external-rpms/releases/download/continuous/rtb2-1.0.0-1.el9.${ARCH}.rpm"
 
-dnf -y install ImageMagick patchelf gcc
+dnf -y install ImageMagick patchelf gcc flexiblas flexiblas-netlib
 
 # ---- COPY FILES INTO APPDIR ---------------------------------------
 
@@ -25,6 +25,32 @@ fi
 
 # RTB2 AppDir.
 ./so_bundle -e /usr/bin/rtb2 -a rtb2.appdir
+
+# FlexiBLAS loads its backend modules at runtime with dlopen(),
+# so so_bundle may not detect/copy them automatically.
+if [ -d /usr/lib64/flexiblas ]; then
+    mkdir -p rtb2.appdir/lib/flexiblas
+    cp -av /usr/lib64/flexiblas/* rtb2.appdir/lib/flexiblas/
+else
+    echo "ERROR: /usr/lib64/flexiblas not found" >&2
+    exit 1
+fi
+
+# Replace AppRun with a deterministic launcher matching the so_bundle layout.
+cat > rtb2.appdir/AppRun << 'EOF'
+#!/usr/bin/env bash
+set -e
+
+DIR="$(dirname "$(readlink -f "$0")")"
+
+export LD_LIBRARY_PATH="$DIR/lib:${LD_LIBRARY_PATH:-}"
+export FLEXIBLAS_LIBRARY_PATH="$DIR/lib/flexiblas"
+export FLEXIBLAS=NETLIB
+
+exec "$DIR/rtb2" "$@"
+EOF
+
+chmod +x rtb2.appdir/AppRun
 
 # makebloc.pl AppDir.
 # This AppDir contains only a Perl script, so appimagetool cannot infer
