@@ -38,6 +38,8 @@ apps=(
   xmipp_image_resize
   xmipp_phantom_simulate_microscope
   xmipp_ctf_phase_flip
+  xmipp_transform_geometry
+  xmipp_image_operate
 )
 
 for app in "${apps[@]}"; do
