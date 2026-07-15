@@ -59,6 +59,11 @@ jobs:
             arch: x86_64
             runner: ubuntu-22.04
 
+          - component: pdb-fixer
+            script: pdb-fixer/pdb-fixer.sh
+            arch: x86_64
+            runner: ubuntu-22.04
+
           # ARM64
           - component: elnemo
             script: elnemo/elnemo.sh
@@ -97,6 +102,11 @@ jobs:
 
           - component: cs
             script: cs/cs.sh
+            arch: aarch64
+            runner: ubuntu-22.04-arm
+
+          - component: pdb-fixer
+            script: pdb-fixer/pdb-fixer.sh
             arch: aarch64
             runner: ubuntu-22.04-arm
 
