@@ -37,6 +37,7 @@ apps=(
   xmipp_phantom_project
   xmipp_image_resize
   xmipp_phantom_simulate_microscope
+  xmipp_tomo_project
   xmipp_ctf_phase_flip
   xmipp_transform_geometry
   xmipp_image_operate
