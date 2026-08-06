@@ -41,6 +41,7 @@ apps=(
   xmipp_ctf_phase_flip
   xmipp_transform_geometry
   xmipp_image_operate
+  xmipp_ctf_correct_wiener2d
 )
 
 for app in "${apps[@]}"; do
