@@ -17,6 +17,7 @@ This project distributes one AppImage per tool. The provided executables include
 * **SMOG 2** — tools for generating structure-based models for molecular simulation.
 * **ELNEMO** — utilities for analyzing elastic network models.
 * **GENESIS** — simulation engine for molecular dynamics tasks.
+* **GENESIS atdyn (single CPU)** — MDSpace GENESIS built from source with MPI disabled.
 
 Each tool has its own AppImage executable, and each AppImage contains all dependencies required to run that specific tool.
 
