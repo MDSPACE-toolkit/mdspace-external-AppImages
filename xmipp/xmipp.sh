@@ -31,7 +31,7 @@ chmod +x "$APPIMAGETOOL"
 
 
 apps=(
-  xmipp_reconstruct_fourier
+  xmipp_reconstruct_fourier_accel
   xmipp_image_convert
   xmipp_volume_from_pdb
   xmipp_phantom_project
