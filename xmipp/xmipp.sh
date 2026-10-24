@@ -42,6 +42,7 @@ apps=(
   xmipp_transform_geometry
   xmipp_image_operate
   xmipp_ctf_correct_wiener2d
+  xmipp_transform_window
 )
 
 for app in "${apps[@]}"; do
